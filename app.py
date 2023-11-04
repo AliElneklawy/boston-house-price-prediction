@@ -7,6 +7,9 @@ from sklearn.base import TransformerMixin, BaseEstimator
 import lightgbm as lgbm
 from scipy import stats
 import joblib
+import streamlit as st
+
+user_input, user_input_df = {}, {}
 
 class BoxCoxTransform(TransformerMixin, BaseEstimator):
     def __init__(self) -> None:
@@ -18,15 +21,12 @@ class BoxCoxTransform(TransformerMixin, BaseEstimator):
     def transform(self, X):
         X_np = np.array(X)
         if X_np.shape[0] == 1:
-            return X_np  # No transformation needed for a single point
+            return X_np
         
         transformed_data = X_np.copy()
         for column in range(X_np.shape[1]):
             transformed_data[:, column], _ = stats.boxcox(X_np[:, column])
         return transformed_data
-
-""" with open('boston_housing_model.pkl', 'rb') as f:
-    loaded_model = joblib.load(f) """
 
 box_cox_transformer = BoxCoxTransform()
 log_transformer = FunctionTransformer(np.log, inverse_func=np.exp)
@@ -39,46 +39,118 @@ transformations = ColumnTransformer([
 remainder='passthrough')
 preprocessing = make_pipeline(transformations, std_scaler)
 
+with open('boston_housing_model.pkl', 'rb') as f:
+                loaded_model = joblib.load(f)
 
-def get_input():
+placeholder_value = -1.0
+st.markdown("<h1>Boston Housing Price Prediction</h1>", unsafe_allow_html=True)
+with st.form('form'):
+    col1, col2 = st.columns(2)
 
-    user_input = {}
-    feat1 = float(input())
-    feat2 = float(input())
-    feat3 = float(input())
-    feat4 = float(input())
-    feat5 = float(input())
-    feat6 = float(input())
-    feat7 = float(input())
-    feat8 = float(input())
-    feat9 = float(input())
-    feat10 = float(input())
-    feat11 = float(input())
-    feat12 = float(input())
-    feat13 = float(input())
+    CRIM = col1.text_input('CRIM', help='Per Capita Crime Rate')
+    ZN = col1.text_input('ZN', help='Proportion of Residential Land Zoned')
+    INDUS = col1.text_input('INDUS', help='Proportion of Non-retail Business Acres (1 if tract bounds river; 0 otherwise)')
+    NOX = col1.text_input('NOX [parts/10M]', help='nitric oxides concentration')
+    RM = col1.text_input('RM', help='average number of rooms per dwelling')
+    AGE = col1.text_input('Age', help='proportion of owner-occupied units built prior to 1940')
+    DIS = col2.text_input('DIS', help='weighted distances to five Boston employment centres')
+    RAD = col2.text_input('RAD', help='index of accessibility to radial highways')
+    PTRATIO = col2.text_input('PTRATIO', help='pupil-teacher ratio by town')
+    TAX = col2.text_input('TAX [$/10k]', help='full-value property-tax rate')
+    B = col2.text_input('B', help='The result of the equation B=1000(Bk - 0.63)^2 where Bk is the proportion of blacks by town')
+    LSTAT = col2.text_input('LSTAT', help='% lower status of the population')
+    CHAS = st.text_input('CHAS', help='Charles River dummy variable (1 if tract bounds river; 0 otherwise')
 
-
-    user_input['CRIM'] = feat1
-    user_input['ZN'] = feat2
-    user_input['INDUS'] = feat3
-    user_input['CHAS'] = feat4
-    user_input['NOX'] = feat5
-    user_input['RM'] = feat6
-    user_input['AGE'] = feat7
-    user_input['DIS'] = feat8
-    user_input['RAD'] = feat9
-    user_input['TAX'] = feat10
-    user_input['PTRATIO'] = feat11
-    user_input['B'] = feat12
-    user_input['LSTAT'] = feat13
-
-    user_input_df = pd.DataFrame([user_input])
-    return user_input_df
-
-
-if __name__ == '__main__':
+    submitted = st.form_submit_button('Submit')
     
-    with open('boston_housing_model.pkl', 'rb') as f:
-        loaded_model = joblib.load(f)
-    input = get_input()
-    print(f"{loaded_model.predict(input)[0].round(2)}")
+    if submitted:
+        empty_fields = []
+        
+        if not CRIM:
+            empty_fields.append('CRIM')
+        else:
+            CRIM = float(CRIM)
+        
+        if not ZN:
+            empty_fields.append('ZN')
+        else:
+            ZN = float(ZN)
+        
+        if not INDUS:
+            empty_fields.append('INDUS')
+        else:
+            INDUS = float(INDUS)
+        
+        if not NOX:
+            empty_fields.append('NOX [parts/10M]')
+        else:
+            NOX = float(NOX)
+        
+        if not RM:
+            empty_fields.append('RM')
+        else:
+            RM = float(RM)
+        
+        if not AGE:
+            empty_fields.append('Age')
+        else:
+            AGE = float(AGE)
+        
+        if not DIS:
+            empty_fields.append('DIS')
+        else:
+            DIS = float(DIS)
+        
+        if not RAD:
+            empty_fields.append('RAD')
+        else:
+            RAD = float(RAD)
+        
+        if not PTRATIO:
+            empty_fields.append('PTRATIO')
+        else:
+            PTRATIO = float(PTRATIO)
+        
+        if not TAX:
+            empty_fields.append('TAX [$/10k]')
+        else:
+            TAX = float(TAX)
+        
+        if not B:
+            empty_fields.append('B')
+        else:
+            B = float(B)
+        
+        if not LSTAT:
+            empty_fields.append('LSTAT')
+        else:
+            LSTAT = float(LSTAT)
+        
+        if not CHAS:
+            empty_fields.append('CHAS')
+        else:
+            CHAS = float(CHAS)
+
+        if empty_fields:
+            st.error(f'The following fields are empty: {", ".join(empty_fields)}')
+
+        else:
+            user_input['CRIM'] = CRIM
+            user_input['ZN'] = ZN
+            user_input['INDUS'] = INDUS
+            user_input['CHAS'] = CHAS
+            user_input['NOX'] = NOX
+            user_input['RM'] = RM
+            user_input['AGE'] = AGE
+            user_input['DIS'] = DIS
+            user_input['RAD'] = RAD
+            user_input['TAX'] = TAX
+            user_input['PTRATIO'] = PTRATIO
+            user_input['B'] = B
+            user_input['LSTAT'] = LSTAT
+            user_input_df = pd.DataFrame([user_input])
+
+            st.success('Processing...')
+            prediction = loaded_model.predict(user_input_df)[0].round(2)
+            st.write(f"Median value of owner-occupied homes in \$1000's [k$]: {prediction}")
+            
