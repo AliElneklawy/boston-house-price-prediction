@@ -2,5 +2,6 @@
 
 
 
-https://github.com/AliElneklawy/boston-house-price-prediction/assets/89526026/993ddbf3-f919-4667-924c-76d5a02c2bbc
+
+https://github.com/AliElneklawy/boston-house-price-prediction/assets/89526026/d913c330-7835-4efa-95d1-121a98edf377
 
